@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Defter — Bulmaca Koleksiyonu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2EDE3;
+    --paper-2:#EAE2D2;
+    --ink:#1F2A3C;
+    --ink-soft:#4A5568;
+    --accent:#D97D43;
+    --accent-2:#5B7C6B;
+    --rule:#C9C0AE;
+    --white:#FBF9F4;
+    --danger:#B5483F;
+    --shadow: 0 1px 0 rgba(31,42,60,0.06), 0 8px 24px -8px rgba(31,42,60,0.18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(31,42,60,0.035) 1px, transparent 0);
+    background-size: 22px 22px;
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    margin:0;
+    font-weight:600;
+  }
+
+  .mono{ font-family:'Space Mono', monospace; }
+
+  a{ color:inherit; }
+
+  button{
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    border:none;
+    background:none;
+    color:inherit;
+  }
+
+  /* ===== Layout shell ===== */
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:32px 24px 80px;
+  }
+
+  header.site-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:18px;
+    margin-bottom:36px;
+    gap:16px;
+  }
+  header.site-head .brand{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+  }
+  header.site-head .brand .mark{
+    width:34px;height:34px;
+    border:2px solid var(--ink);
+    border-radius:3px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    transform:rotate(-4deg);
+    flex-shrink:0;
+  }
+  header.site-head h1{
+    font-size:28px;
+    letter-spacing:0.01em;
+  }
+  header.site-head .tagline{
+    font-size:13px;
+    color:var(--ink-soft);
+    font-style:italic;
+    font-family:'Fraunces', serif;
+  }
+  header.site-head .date-stamp{
+    font-size:12px;
+    color:var(--ink-soft);
+    text-align:right;
+    line-height:1.5;
+  }
+
+  /* ===== Views ===== */
+  .view{ display:none; }
+  .view.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ===== Home grid of puzzle cards ===== */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:22px;
+  }
+
+  .card{
+    background:var(--white);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:24px 22px 22px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:5px;
+    background:var(--card-color, var(--accent));
+  }
+  .card:hover{ transform:translateY(-3px); }
+
+  .card .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--card-color, var(--accent));
+    margin-bottom:10px;
+    display:block;
+  }
+  .card h2{ font-size:22px; margin-bottom:8px; }
+  .card p.desc{
+    font-size:14px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin:0 0 18px;
+    min-height:42px;
+  }
+
+  .card .stars{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:16px;
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  .card .stars .filled{ color:var(--accent); }
+
+  .play-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--ink);
+    color:var(--white);
+    padding:10px 18px;
+    border-radius:4px;
+    font-size:14px;
+    font-weight:600;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .play-btn:hover{ background:var(--card-color, var(--accent)); transform:translateX(2px); }
+  .play-btn svg{ width:14px; height:14px; }
+
+  /* ===== Difficulty stamp picker ===== */
+  .stamp-row{
+    display:flex;
+    gap:10px;
+    margin:18px 0 4px;
+    flex-wrap:wrap;
+  }
+  .stamp{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:8px 16px;
+    border:2px solid var(--ink);
+    border-radius:3px;
+    background:transparent;
+    color:var(--ink);
+    position:relative;
+    transition:transform .12s ease;
+  }
+  .stamp:hover{ transform:rotate(-2deg) scale(1.03); }
+  .stamp.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .stamp.active::after{
+    content:"✓";
+    margin-left:6px;
+  }
+
+  /* ===== Puzzle view header ===== */
+  .puzzle-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:18px;
+    margin-bottom:22px;
+  }
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+  }
+  .back-link:hover{ color:var(--ink); }
+  .back-link svg{ width:14px; height:14px; }
+
+  .puzzle-title-block h2{ font-size:30px; margin-bottom:4px; }
+  .puzzle-title-block .sub{ font-size:13px; color:var(--ink-soft); font-family:'Space Mono', monospace; }
+
+  .hud{
+    display:flex;
+    gap:18px;
+    align-items:center;
+  }
+  .hud-item{
+    text-align:center;
+    min-width:64px;
+  }
+  .hud-item .label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:2px;
+  }
+  .hud-item .value{
+    font-family:'Space Mono', monospace;
+    font-size:20px;
+    font-weight:700;
+  }
+
+  .ctrl-btn{
+    border:1.5px solid var(--ink);
+    border-radius:4px;
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:600;
+    background:var(--white);
+    transition:background .15s ease, color .15s ease;
+  }
+  .ctrl-btn:hover{ background:var(--ink); color:var(--paper); }
+  .ctrl-btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--white); }
+  .ctrl-btn.primary:hover{ background:var(--ink); border-color:var(--ink); }
+
+  .toast{
+    position:fixed;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--ink);
+    color:var(--paper);
+    padding:14px 26px;
+    border-radius:5px;
+    font-family:'Fraunces', serif;
+    font-size:16px;
+    box-shadow:var(--shadow);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:50;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ===== SUDOKU ===== */
+  .sudoku-board{
+    display:grid;
+    grid-template-columns:repeat(9, 1fr);
+    width:min(440px, 100%);
+    aspect-ratio:1;
+    margin:0 auto;
+    background:var(--ink);
+    gap:1px;
+    border:3px solid var(--ink);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .sudoku-cell{
+    background:var(--white);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Space Mono', monospace;
+    font-size:clamp(14px, 3vw, 19px);
+    position:relative;
+    aspect-ratio:1;
+  }
+  .sudoku-cell.given{ font-weight:700; color:var(--ink); background:var(--paper-2); }
+  .sudoku-cell.editable{ color:var(--accent-2); font-weight:600; cursor:pointer; }
+  .sudoku-cell.editable:hover{ background:#F6EFE3; }
+  .sudoku-cell.selected{ background:#FBE6CF; }
+  .sudoku-cell.error{ color:var(--danger); }
+  .sudoku-cell.thick-right{ border-right:3px solid var(--ink); }
+  .sudoku-cell.thick-bottom{ border-bottom:3px solid var(--ink); }
+  .sudoku-cell input{
+    width:100%; height:100%;
+    border:none; background:transparent;
+    text-align:center;
+    font-family:'Space Mono', monospace;
+    font-size:inherit;
+    color:var(--accent-2);
+    font-weight:600;
+    outline:none;
+    padding:0;
+  }
+
+  .numpad{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:20px;
+    flex-wrap:wrap;
+  }
+  .numpad button{
+    width:42px; height:42px;
+    border:1.5px solid var(--rule);
+    border-radius:4px;
+    font-family:'Space Mono', monospace;
+    font-size:16px;
+    font-weight:700;
+    background:var(--white);
+    transition:background .12s, border-color .12s;
+  }
+  .numpad button:hover{ border-color:var(--ink); background:var(--paper-2); }
+  .numpad button.erase{ color:var(--danger); font-size:13px; width:auto; padding:0 14px; }
+
+  /* ===== WORD SEARCH ===== */
+  .ws-layout{
+    display:flex;
+    gap:32px;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    justify-content:center;
+  }
+  .ws-board{
+    display:grid;
+    background:var(--white);
+    border:2px solid var(--ink);
+    border-radius:4px;
+    user-select:none;
+    touch-action:none;
+  }
+  .ws-cell{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Space Mono', monospace;
+    font-weight:700;
+    font-size:15px;
+    color:var(--ink);
+    position:relative;
+  }
+  .ws-cell.path{ background:#FBE6CF; }
+  .ws-cell.found{ background:var(--accent-2); color:var(--white); border-radius:50%; }
+  .ws-word-list{
+    min-width:180px;
+  }
+  .ws-word-list h3{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    margin-bottom:12px;
+  }
+  .ws-word-list ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+  .ws-word-list li{
+    font-family:'Space Mono', monospace;
+    font-size:14px;
+    padding:6px 10px;
+    border:1px solid var(--rule);
+    border-radius:4px;
+    background:var(--white);
+  }
+  .ws-word-list li.done{
+    text-decoration:line-through;
+    color:var(--ink-soft);
+    background:var(--paper-2);
+    border-color:var(--paper-2);
+  }
+
+  /* ===== SLIDE PUZZLE ===== */
+  .slide-board{
+    display:grid;
+    width:min(420px, 100%);
+    aspect-ratio:1;
+    margin:0 auto;
+    gap:6px;
+    background:var(--rule);
+    border:3px solid var(--ink);
+    border-radius:6px;
+    padding:6px;
+  }
+  .slide-tile{
+    background:var(--accent);
+    color:var(--white);
+    border-radius:4px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(18px, 4vw, 30px);
+    cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .slide-tile:hover{ filter:brightness(1.08); }
+  .slide-tile.empty{ background:transparent; cursor:default; }
+  .slide-tile.empty:hover{ filter:none; }
+
+  .win-banner{
+    text-align:center;
+    margin-top:24px;
+    padding:22px;
+    border:2px dashed var(--accent-2);
+    border-radius:6px;
+    background:#F1F4EE;
+  }
+  .win-banner h3{ font-size:22px; color:var(--accent-2); margin-bottom:6px; }
+  .win-banner p{ font-size:14px; color:var(--ink-soft); margin:0; }
+
+  footer{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:60px;
+    padding-top:20px;
+    border-top:1px solid var(--rule);
+  }
+
+  @media (max-width:600px){
+    header.site-head{ flex-direction:column; align-items:flex-start; }
+    header.site-head .date-stamp{ text-align:left; }
+    .puzzle-head{ flex-direction:column; }
+    .hud{ width:100%; justify-content:space-between; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="site-head">
+    <div class="brand">
+      <div class="mark">D</div>
+      <div>
+        <h1>Defter</h1>
+        <div class="tagline">günün üç bulmacası</div>
+      </div>
+    </div>
+    <div class="date-stamp" id="dateStamp"></div>
+  </header>
+
+  <!-- ===================== HOME VIEW ===================== -->
+  <div class="view active" id="view-home">
+    <div class="grid">
+
+      <!-- Sudoku card -->
+      <div class="card" style="--card-color:var(--accent)">
+        <span class="eyebrow">Sayı Mantığı</span>
+        <h2>Sudoku</h2>
+        <p class="desc">Her satır, sütun ve 3×3 kutuda 1–9 arası rakamları tekrarsız yerleştir.</p>
+        <div class="stars"><span class="filled">●</span><span class="filled">●</span><span>●</span> orta zorluk seçilebilir</div>
+        <div id="sudoku-diff" class="stamp-row"></div>
+        <button class="play-btn" onclick="startSudoku()">
+          Oyna
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Word search card -->
+      <div class="card" style="--card-color:var(--accent-2)">
+        <span class="eyebrow">Kelime Avı</span>
+        <h2>Kelime Bulmaca</h2>
+        <p class="desc">Harf tablosunda saklı kelimeleri bul; yatay, dikey ve çapraz yönlerde gizlendiler.</p>
+        <div class="stars"><span class="filled">●</span><span>●</span><span>●</span> ızgara boyutu değişir</div>
+        <div id="ws-diff" class="stamp-row"></div>
+        <button class="play-btn" onclick="startWordSearch()">
+          Oyna
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <!-- Slide puzzle card -->
+      <div class="card" style="--card-color:#A85C8C">
+        <span class="eyebrow">Kaydırmalı Bulmaca</span>
+        <h2>15'li Bulmaca</h2>
+        <p class="desc">Sayılı kareleri boş alana doğru kaydırarak 1'den başlayan sıraya diz.</p>
+        <div class="stars"><span class="filled">●</span><span>●</span><span>●</span> ızgara boyutu değişir</div>
+        <div id="slide-diff" class="stamp-row"></div>
+        <button class="play-btn" onclick="startSlide()" style="--card-color:#A85C8C">
+          Oyna
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== SUDOKU VIEW ===================== -->
+  <div class="view" id="view-sudoku">
+    <a class="back-link" href="#" onclick="goHome(event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      Koleksiyona dön
+    </a>
+    <div class="puzzle-head">
+      <div class="puzzle-title-block">
+        <h2>Sudoku</h2>
+        <div class="sub" id="sudoku-diff-label">ORTA</div>
+      </div>
+      <div class="hud">
+        <div class="hud-item">
+          <span class="label">Süre</span>
+          <span class="value mono" id="sudoku-timer">00:00</span>
+        </div>
+        <div class="hud-item">
+          <span class="label">Hata</span>
+          <span class="value mono" id="sudoku-errors">0</span>
+        </div>
+        <button class="ctrl-btn" onclick="checkSudoku()">Kontrol Et</button>
+        <button class="ctrl-btn primary" onclick="newSudoku()">Yeni</button>
+      </div>
+    </div>
+
+    <div class="sudoku-board" id="sudoku-board"></div>
+    <div class="numpad" id="sudoku-numpad"></div>
+  </div>
+
+  <!-- ===================== WORD SEARCH VIEW ===================== -->
+  <div class="view" id="view-ws">
+    <a class="back-link" href="#" onclick="goHome(event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      Koleksiyona dön
+    </a>
+    <div class="puzzle-head">
+      <div class="puzzle-title-block">
+        <h2>Kelime Bulmaca</h2>
+        <div class="sub" id="ws-diff-label">ORTA</div>
+      </div>
+      <div class="hud">
+        <div class="hud-item">
+          <span class="label">Süre</span>
+          <span class="value mono" id="ws-timer">00:00</span>
+        </div>
+        <div class="hud-item">
+          <span class="label">Bulundu</span>
+          <span class="value mono" id="ws-found-count">0/0</span>
+        </div>
+        <button class="ctrl-btn primary" onclick="newWordSearch()">Yeni</button>
+      </div>
+    </div>
+
+    <div class="ws-layout">
+      <div class="ws-board" id="ws-board"></div>
+      <div class="ws-word-list">
+        <h3>Kelimeler</h3>
+        <ul id="ws-words"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SLIDE PUZZLE VIEW ===================== -->
+  <div class="view" id="view-slide">
+    <a class="back-link" href="#" onclick="goHome(event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      Koleksiyona dön
+    </a>
+    <div class="puzzle-head">
+      <div class="puzzle-title-block">
+        <h2>15'li Bulmaca</h2>
+        <div class="sub" id="slide-diff-label">ORTA · 4×4</div>
+      </div>
+      <div class="hud">
+        <div class="hud-item">
+          <span class="label">Süre</span>
+          <span class="value mono" id="slide-timer">00:00</span>
+        </div>
+        <div class="hud-item">
+          <span class="label">Hamle</span>
+          <span class="value mono" id="slide-moves">0</span>
+        </div>
+        <button class="ctrl-btn" onclick="shuffleSlide()">Karıştır</button>
+        <button class="ctrl-btn primary" onclick="newSlide()">Yeni</button>
+      </div>
+    </div>
+
+    <div class="slide-board" id="slide-board"></div>
+    <div id="slide-win"></div>
+  </div>
+
+  <footer>Defter — kağıt üstünde değil ama kağıt gibi. Tüm bulmacalar tarayıcında üretilir, sunucuya hiçbir şey gönderilmez.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ORTAK YARDIMCI FONKSİYONLAR
+   ============================================================ */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function goHome(e){
+  e.preventDefault();
+  stopAllTimers();
+  showView('view-home');
+}
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function fmtTime(s){
+  const m = Math.floor(s/60).toString().padStart(2,'0');
+  const sec = (s%60).toString().padStart(2,'0');
+  return m+':'+sec;
+}
+function setDateStamp(){
+  const d = new Date();
+  const opts = { day:'numeric', month:'long', year:'numeric' };
+  document.getElementById('dateStamp').innerHTML = d.toLocaleDateString('tr-TR', opts) + '<br>sayı no. ' + (d.getDate()+d.getMonth()*31);
+}
+setDateStamp();
+
+function stopAllTimers(){
+  if(sudokuState.timerHandle){ clearInterval(sudokuState.timerHandle); sudokuState.timerHandle=null; }
+  if(wsState.timerHandle){ clearInterval(wsState.timerHandle); wsState.timerHandle=null; }
+  if(slideState.timerHandle){ clearInterval(slideState.timerHandle); slideState.timerHandle=null; }
+}
+
+/* Difficulty stamp builder, shared UI for the three home cards */
+function buildStampRow(containerId, levels, activeIndex, onPick){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  levels.forEach((label, i)=>{
+    const b = document.createElement('button');
+    b.className = 'stamp' + (i===activeIndex ? ' active' : '');
+    b.textContent = label;
+    b.onclick = ()=>{
+      onPick(i);
+      buildStampRow(containerId, levels, i, onPick);
+    };
+    el.appendChild(b);
+  });
+}
+
+/* ============================================================
+   1. SUDOKU
+   ============================================================ */
+const sudokuState = {
+  difficulty: 1, // 0 kolay, 1 orta, 2 zor -> removed cell counts
+  solution: [],
+  puzzle: [],
+  given: [],
+  selected: null,
+  seconds: 0,
+  timerHandle: null,
+  errors: 0,
+};
+const SUDOKU_LEVELS = ['Kolay', 'Orta', 'Zor'];
+const SUDOKU_REMOVE = [35, 45, 55]; // hücre sayısı silinecek (81 toplam)
+
+buildStampRow('sudoku-diff', SUDOKU_LEVELS, sudokuState.difficulty, (i)=>{ sudokuState.difficulty = i; });
+
+function genSudokuSolution(){
+  const grid = Array.from({length:9}, ()=>Array(9).fill(0));
+  function isValid(g,r,c,v){
+    for(let i=0;i<9;i++){ if(g[r][i]===v || g[i][c]===v) return false; }
+    const br=Math.floor(r/3)*3, bc=Math.floor(c/3)*3;
+    for(let i=0;i<3;i++)for(let j=0;j<3;j++) if(g[br+i][bc+j]===v) return false;
+    return true;
+  }
+  function fill(pos){
+    if(pos===81) return true;
+    const r = Math.floor(pos/9), c = pos%9;
+    const nums = [1,2,3,4,5,6,7,8,9];
+    for(let i=nums.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [nums[i],nums[j]]=[nums[j],nums[i]]; }
+    for(const v of nums){
+      if(isValid(grid,r,c,v)){
+        grid[r][c]=v;
+        if(fill(pos+1)) return true;
+        grid[r][c]=0;
+      }
+    }
+    return false;
+  }
+  fill(0);
+  return grid;
+}
+
+function newSudoku(){
+  const sol = genSudokuSolution();
+  sudokuState.solution = sol;
+  const puzzle = sol.map(row=>row.slice());
+  const given = sol.map(row=>row.map(()=>true));
+  let toRemove = SUDOKU_REMOVE[sudokuState.difficulty];
+  while(toRemove>0){
+    const r = Math.floor(Math.random()*9), c = Math.floor(Math.random()*9);
+    if(puzzle[r][c]!==0){
+      puzzle[r][c]=0;
+      given[r][c]=false;
+      toRemove--;
+    }
+  }
+  sudokuState.puzzle = puzzle;
+  sudokuState.given = given;
+  sudokuState.selected = null;
+  sudokuState.errors = 0;
+  sudokuState.seconds = 0;
+  document.getElementById('sudoku-errors').textContent = '0';
+  document.getElementById('sudoku-diff-label').textContent = SUDOKU_LEVELS[sudokuState.difficulty].toUpperCase();
+  renderSudoku();
+  if(sudokuState.timerHandle) clearInterval(sudokuState.timerHandle);
+  sudokuState.timerHandle = setInterval(()=>{
+    sudokuState.seconds++;
+    document.getElementById('sudoku-timer').textContent = fmtTime(sudokuState.seconds);
+  }, 1000);
+}
+
+function renderSudoku(){
+  const board = document.getElementById('sudoku-board');
+  board.innerHTML = '';
+  for(let r=0;r<9;r++){
+    for(let c=0;c<9;c++){
+      const cell = document.createElement('div');
+      cell.className = 'sudoku-cell';
+      if((c+1)%3===0 && c!==8) cell.classList.add('thick-right');
+      if((r+1)%3===0 && r!==8) cell.classList.add('thick-bottom');
+      const val = sudokuState.puzzle[r][c];
+      if(sudokuState.given[r][c]){
+        cell.classList.add('given');
+        cell.textContent = val;
+      } else {
+        cell.classList.add('editable');
+        cell.textContent = val===0 ? '' : val;
+        cell.dataset.r = r; cell.dataset.c = c;
+        cell.onclick = ()=>selectSudokuCell(r,c);
+      }
+      board.appendChild(cell);
+    }
+  }
+  renderSudokuNumpad();
+}
+
+function renderSudokuNumpad(){
+  const np = document.getElementById('sudoku-numpad');
+  np.innerHTML = '';
+  for(let n=1;n<=9;n++){
+    const b = document.createElement('button');
+    b.textContent = n;
+    b.onclick = ()=>placeSudokuNumber(n);
+    np.appendChild(b);
+  }
+  const erase = document.createElement('button');
+  erase.textContent = 'Sil';
+  erase.className = 'erase';
+  erase.onclick = ()=>placeSudokuNumber(0);
+  np.appendChild(erase);
+}
+
+function selectSudokuCell(r,c){
+  sudokuState.selected = {r,c};
+  document.querySelectorAll('.sudoku-cell').forEach(el=>el.classList.remove('selected'));
+  const idx = r*9+c;
+  document.querySelectorAll('.sudoku-cell')[idx].classList.add('selected');
+}
+
+function placeSudokuNumber(n){
+  if(!sudokuState.selected) { toast('Önce bir hücre seç'); return; }
+  const {r,c} = sudokuState.selected;
+  sudokuState.puzzle[r][c] = n;
+  const idx = r*9+c;
+  const cellEl = document.querySelectorAll('.sudoku-cell')[idx];
+  cellEl.textContent = n===0 ? '' : n;
+  cellEl.classList.remove('error');
+  if(n!==0 && n!==sudokuState.solution[r][c]){
+    cellEl.classList.add('error');
+  }
+  if(isSudokuComplete()){
+    if(isSudokuCorrect()){
+      clearInterval(sudokuState.timerHandle);
+      toast('Tebrikler! Sudoku tamamlandı 🎉');
+    }
+  }
+}
+
+function isSudokuComplete(){
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(sudokuState.puzzle[r][c]===0) return false;
+  return true;
+}
+function isSudokuCorrect(){
+  for(let r=0;r<9;r++) for(let c=0;c<9;c++) if(sudokuState.puzzle[r][c]!==sudokuState.solution[r][c]) return false;
+  return true;
+}
+function checkSudoku(){
+  let errors = 0;
+  document.querySelectorAll('.sudoku-cell.editable').forEach(el=>{
+    const r = +el.dataset.r, c = +el.dataset.c;
+    const v = sudokuState.puzzle[r][c];
+    el.classList.remove('error');
+    if(v!==0 && v!==sudokuState.solution[r][c]){
+      el.classList.add('error');
+      errors++;
+    }
+  });
+  document.getElementById('sudoku-errors').textContent = errors;
+  if(errors===0 && isSudokuComplete()){
+    toast('Tebrikler! Sudoku tamamlandı 🎉');
+    clearInterval(sudokuState.timerHandle);
+  } else if(errors===0){
+    toast('Şu ana kadar hata yok, devam et!');
+  } else {
+    toast(errors+' hatalı hücre işaretlendi');
+  }
+}
+
+function startSudoku(){
+  showView('view-sudoku');
+  newSudoku();
+}
+
+/* ============================================================
+   2. KELİME BULMACA (Word Search)
+   ============================================================ */
+const wsState = {
+  difficulty: 1,
+  size: 10,
+  grid: [],
+  words: [],
+  placed: [], // {word, cells:[[r,c]...]}
+  foundWords: new Set(),
+  isDragging:false,
+  dragCells:[],
+  seconds:0,
+  timerHandle:null,
+};
+const WS_LEVELS = ['Kolay', 'Orta', 'Zor'];
+const WS_SIZES = [8, 10, 13];
+const WORD_BANKS = {
+  8:  ['KEDI','ARI','SU','EV','YOL','DAĞ','GÜL','AY'],
+  10: ['KITAP','MASA','BULUT','DENIZ','ORMAN','GÜNEŞ','RENK','ŞEHIR','NEHIR','ZAMAN'],
+  13: ['BILGISAYAR','YILDIZ','KELEBEK','SEYAHAT','MERDIVEN','PORTAKAL','SADAKAT','KAHRAMAN','MACERA','TELESKOP','HOROZ','BULMACA','HARFLER'],
+};
+
+buildStampRow('ws-diff', WS_LEVELS, wsState.difficulty, (i)=>{ wsState.difficulty = i; });
+
+function turkishUpper(s){
+  return s.toLocaleUpperCase('tr-TR');
+}
+
+function genWordSearch(){
+  const size = WS_SIZES[wsState.difficulty];
+  wsState.size = size;
+  const bank = WORD_BANKS[size].slice();
+  // pick subset of words sized to fit grid, ~6-9 words
+  const count = size===8 ? 5 : size===10 ? 7 : 9;
+  // shuffle bank
+  for(let i=bank.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [bank[i],bank[j]]=[bank[j],bank[i]]; }
+  const words = bank.slice(0, count).map(turkishUpper);
+
+  const grid = Array.from({length:size}, ()=>Array(size).fill(''));
+  const dirs = [[0,1],[1,0],[1,1],[-1,1]]; // right, down, diag-down-right, diag-up-right
+  const placed = [];
+
+  function tryPlace(word){
+    for(let attempt=0; attempt<200; attempt++){
+      const dir = dirs[Math.floor(Math.random()*dirs.length)];
+      const r0 = Math.floor(Math.random()*size);
+      const c0 = Math.floor(Math.random()*size);
+      const len = word.length;
+      const r1 = r0 + dir[0]*(len-1);
+      const c1 = c0 + dir[1]*(len-1);
+      if(r1<0||r1>=size||c1<0||c1>=size) continue;
+      let ok = true;
+      const cells = [];
+      for(let i=0;i<len;i++){
+        const r = r0+dir[0]*i, c = c0+dir[1]*i;
+        const existing = grid[r][c];
+        if(existing!=='' && existing!==word[i]){ ok=false; break; }
+        cells.push([r,c]);
+      }
+      if(!ok) continue;
+      cells.forEach((rc,i)=>{ grid[rc[0]][rc[1]] = word[i]; });
+      placed.push({word, cells});
+      return true;
+    }
+    return false;
+  }
+
+  words.forEach(w=>tryPlace(w));
+
+  const letters = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      if(grid[r][c]==='') grid[r][c] = letters[Math.floor(Math.random()*letters.length)];
+    }
+  }
+
+  wsState.grid = grid;
+  wsState.words = placed.map(p=>p.word);
+  wsState.placed = placed;
+  wsState.foundWords = new Set();
+}
+
+function renderWordSearch(){
+  const board = document.getElementById('ws-board');
+  const size = wsState.size;
+  board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  const cellPx = size<=8 ? 42 : size<=10 ? 36 : 28;
+  board.style.width = (cellPx*size)+'px';
+  board.style.height = (cellPx*size)+'px';
+  board.innerHTML = '';
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      const cell = document.createElement('div');
+      cell.className = 'ws-cell';
+      cell.style.width = cellPx+'px';
+      cell.style.height = cellPx+'px';
+      cell.textContent = wsState.grid[r][c];
+      cell.dataset.r = r; cell.dataset.c = c;
+      cell.addEventListener('pointerdown', ()=>wsStartDrag(r,c));
+      cell.addEventListener('pointerenter', ()=>wsDragOver(r,c));
+      board.appendChild(cell);
+    }
+  }
+  document.addEventListener('pointerup', wsEndDrag);
+
+  const ul = document.getElementById('ws-words');
+  ul.innerHTML = '';
+  wsState.words.forEach(w=>{
+    const li = document.createElement('li');
+    li.textContent = w;
+    li.dataset.word = w;
+    ul.appendChild(li);
+  });
+  document.getElementById('ws-found-count').textContent = `0/${wsState.words.length}`;
+}
+
+function wsCellEl(r,c){
+  return document.querySelector(`.ws-cell[data-r="${r}"][data-c="${c}"]`);
+}
+
+function wsStartDrag(r,c){
+  wsState.isDragging = true;
+  wsState.dragCells = [[r,c]];
+  wsPaintDrag();
+}
+function wsDragOver(r,c){
+  if(!wsState.isDragging) return;
+  const start = wsState.dragCells[0];
+  // build straight line from start to r,c
+  const dr = r-start[0], dc = c-start[1];
+  const steps = Math.max(Math.abs(dr), Math.abs(dc));
+  if(steps===0){ wsState.dragCells=[start]; wsPaintDrag(); return; }
+  const stepR = dr===0?0:dr/Math.abs(dr);
+  const stepC = dc===0?0:dc/Math.abs(dc);
+  // only allow straight horizontal/vertical/diagonal
+  if(!(dr===0 || dc===0 || Math.abs(dr)===Math.abs(dc))) return;
+  const cells = [];
+  for(let i=0;i<=steps;i++){
+    cells.push([start[0]+stepR*i, start[1]+stepC*i]);
+  }
+  wsState.dragCells = cells;
+  wsPaintDrag();
+}
+function wsPaintDrag(){
+  document.querySelectorAll('.ws-cell.path').forEach(el=>el.classList.remove('path'));
+  wsState.dragCells.forEach(([r,c])=>{
+    const el = wsCellEl(r,c);
+    if(el && !el.classList.contains('found')) el.classList.add('path');
+  });
+}
+function wsEndDrag(){
+  if(!wsState.isDragging) return;
+  wsState.isDragging = false;
+  const cellsStr = wsState.dragCells.map(rc=>rc.join(',')).join('|');
+  const cellsRev = wsState.dragCells.slice().reverse().map(rc=>rc.join(',')).join('|');
+
+  let matched = null;
+  for(const p of wsState.placed){
+    const pStr = p.cells.map(rc=>rc.join(',')).join('|');
+    if(pStr===cellsStr || pStr===cellsRev){ matched = p; break; }
+  }
+  document.querySelectorAll('.ws-cell.path').forEach(el=>el.classList.remove('path'));
+  if(matched && !wsState.foundWords.has(matched.word)){
+    wsState.foundWords.add(matched.word);
+    matched.cells.forEach(([r,c])=>{
+      wsCellEl(r,c).classList.add('found');
+    });
+    const li = document.querySelector(`#ws-words li[data-word="${matched.word}"]`);
+    if(li) li.classList.add('done');
+    document.getElementById('ws-found-count').textContent = `${wsState.foundWords.size}/${wsState.words.length}`;
+    if(wsState.foundWords.size === wsState.words.length){
+      toast('Tüm kelimeler bulundu! 🎉');
+      clearInterval(wsState.timerHandle);
+    }
+  }
+  wsState.dragCells = [];
+}
+
+function newWordSearch(){
+  genWordSearch();
+  renderWordSearch();
+  document.getElementById('ws-diff-label').textContent = WS_LEVELS[wsState.difficulty].toUpperCase();
+  wsState.seconds = 0;
+  document.getElementById('ws-timer').textContent = '00:00';
+  if(wsState.timerHandle) clearInterval(wsState.timerHandle);
+  wsState.timerHandle = setInterval(()=>{
+    wsState.seconds++;
+    document.getElementById('ws-timer').textContent = fmtTime(wsState.seconds);
+  }, 1000);
+}
+
+function startWordSearch(){
+  showView('view-ws');
+  newWordSearch();
+}
+
+/* ============================================================
+   3. 15'Lİ KAYDIRMALI BULMACA (Slide puzzle)
+   ============================================================ */
+const slideState = {
+  difficulty: 1,
+  size: 4,
+  tiles: [],
+  emptyIndex: 0,
+  moves: 0,
+  seconds: 0,
+  timerHandle: null,
+  won:false,
+};
+const SLIDE_LEVELS = ['Kolay', 'Orta', 'Zor'];
+const SLIDE_SIZES = [3, 4, 5];
+
+buildStampRow('slide-diff', SLIDE_LEVELS, slideState.difficulty, (i)=>{ slideState.difficulty = i; });
+
+function newSlide(){
+  const size = SLIDE_SIZES[slideState.difficulty];
+  slideState.size = size;
+  const total = size*size;
+  const tiles = [];
+  for(let i=1;i<total;i++) tiles.push(i);
+  tiles.push(0); // 0 = empty
+  slideState.tiles = tiles;
+  slideState.emptyIndex = total-1;
+  slideState.moves = 0;
+  slideState.seconds = 0;
+  slideState.won = false;
+  document.getElementById('slide-moves').textContent = '0';
+  document.getElementById('slide-timer').textContent = '00:00';
+  document.getElementById('slide-diff-label').textContent = `${SLIDE_LEVELS[slideState.difficulty].toUpperCase()} · ${size}×${size}`;
+  document.getElementById('slide-win').innerHTML = '';
+  renderSlide();
+  shuffleSlide(true);
+  if(slideState.timerHandle) clearInterval(slideState.timerHandle);
+  slideState.timerHandle = setInterval(()=>{
+    slideState.seconds++;
+    document.getElementById('slide-timer').textContent = fmtTime(slideState.seconds);
+  }, 1000);
+}
+
+function shuffleSlide(silent){
+  const size = slideState.size;
+  // perform many random valid moves from solved state to guarantee solvability
+  let tiles = [];
+  for(let i=1;i<size*size;i++) tiles.push(i);
+  tiles.push(0);
+  let emptyIdx = tiles.length-1;
+  const shuffleMoves = size*size*40;
+  for(let i=0;i<shuffleMoves;i++){
+    const neighbors = getNeighbors(emptyIdx, size);
+    const pick = neighbors[Math.floor(Math.random()*neighbors.length)];
+    [tiles[emptyIdx], tiles[pick]] = [tiles[pick], tiles[emptyIdx]];
+    emptyIdx = pick;
+  }
+  slideState.tiles = tiles;
+  slideState.emptyIndex = emptyIdx;
+  slideState.moves = 0;
+  slideState.won = false;
+  document.getElementById('slide-moves').textContent = '0';
+  document.getElementById('slide-win').innerHTML = '';
+  renderSlide();
+  if(!silent) toast('Karıştırıldı!');
+}
+
+function getNeighbors(idx, size){
+  const r = Math.floor(idx/size), c = idx%size;
+  const res = [];
+  if(r>0) res.push(idx-size);
+  if(r<size-1) res.push(idx+size);
+  if(c>0) res.push(idx-1);
+  if(c<size-1) res.push(idx+1);
+  return res;
+}
+
+function renderSlide(){
+  const size = slideState.size;
+  const board = document.getElementById('slide-board');
+  board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  board.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+  board.innerHTML = '';
+  slideState.tiles.forEach((val, idx)=>{
+    const tile = document.createElement('div');
+    tile.className = 'slide-tile' + (val===0 ? ' empty' : '');
+    tile.textContent = val===0 ? '' : val;
+    tile.onclick = ()=>moveSlide(idx);
+    board.appendChild(tile);
+  });
+}
+
+function moveSlide(idx){
+  if(slideState.won) return;
+  const size = slideState.size;
+  const neighbors = getNeighbors(slideState.emptyIndex, size);
+  if(!neighbors.includes(idx)) return;
+  [slideState.tiles[slideState.emptyIndex], slideState.tiles[idx]] = [slideState.tiles[idx], slideState.tiles[slideState.emptyIndex]];
+  slideState.emptyIndex = idx;
+  slideState.moves++;
+  document.getElementById('slide-moves').textContent = slideState.moves;
+  renderSlide();
+  checkSlideWin();
+}
+
+function checkSlideWin(){
+  const tiles = slideState.tiles;
+  for(let i=0;i<tiles.length-1;i++){
+    if(tiles[i]!==i+1) return;
+  }
+  if(tiles[tiles.length-1]!==0) return;
+  slideState.won = true;
+  clearInterval(slideState.timerHandle);
+  document.getElementById('slide-win').innerHTML = `
+    <div class="win-banner">
+      <h3>Tamamlandı! 🎉</h3>
+      <p>${slideState.moves} hamlede, ${fmtTime(slideState.seconds)} sürede çözdün.</p>
+    </div>`;
+}
+
+function startSlide(){
+  showView('view-slide');
+  newSlide();
+}
+</script>
+</body>
+</html>
